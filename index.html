@@ -1,0 +1,126 @@
+<script>
+// ブラックジャック
+// https://ja.wikibooks.org/wiki/%E3%83%88%E3%83%A9%E3%83%B3%E3%83%97/%E3%83%96%E3%83%A9%E3%83%83%E3%82%AF%E3%82%B8%E3%83%A3%E3%83%83%E3%82%AF
+// 細かな動作はこちらを参考にした
+// https://p-game.jp/game/341/detail
+
+// デッキの作成
+// デッキは各スートの1〜13までのカード（13*4=52枚）とし、ジョーカーは含まれない
+
+let deck = []
+const suit = ['♥','♠','♣','◆']
+
+for(let i=0;i<suit.length;i++){
+	for(let j=1;j<=13;j++){
+		deck.push({
+			number:j,
+			suit:suit[i]
+		})
+	}
+}
+
+// デッキのシャッフル
+// 別のやり方：https://ja.javascript.info/task/shuffle
+for(let i=0; i<deck.length ; i++){
+	const rand = Math.floor(Math.random()*deck.length)
+	const tmp = deck[i]
+	deck[i] = deck[rand]
+	deck[rand] = tmp
+}
+
+// for(let i=0; i<deck.length ; i++){
+// 	printCard(deck[i])
+// }
+// 
+function printCard(card){
+	console.log(card.number + card.suit)
+}
+
+let playerCards = []
+let dealerCards = []
+
+// ヒット：カードを一枚引く
+function hit(){
+	return deck.shift()
+}
+
+// スタンド（スティとも）：カードを引かずに現在の点数で勝負する
+function stand(){
+}
+
+// 手札の点数を計算
+function value(cards){
+	if(cards.length===0) return 0
+	let aces = 0
+	let points = 0
+	for(let i=0;i<cards.length;i++){
+		switch(cards[i].number) {
+			case 1:
+				aces++
+				points+=1	// 現段階ではaceは1とみなす
+				break;
+			case 11:
+			case 12:
+			case 13:
+				points+=10	// 絵札は+10
+				break;
+			default:
+				points+=cards[i].number
+				break;
+		}
+	}
+	// 21を超えない範囲でace を1→11とする(21まではOK)
+	for(let i=0; i<aces; i++){
+		if(points + 10 < 21){
+			points += 10
+		}
+	}
+	
+	return points
+}
+
+function judge(){
+	const playerScore = value(playerCards)
+	const dealerScore = value(dealerCards)
+	const playerIsBust = playerScore > 21 ? '（バスト）' : ''
+	const dealerIsBust = dealerScore > 21 ? '（バスト）' : ''
+	console.log(`プレイヤー:${playerScore}${playerIsBust}、親:${dealerScore}${dealerIsBust}`)
+
+	// プレイヤーも親も両方バスト
+	if(playerScore > 21 && dealerScore > 21){
+		console.log('引き分け')
+	}
+	// 親がバスト
+	else if(dealerScore > 21){
+		console.log(`プレイヤーの勝ち`)
+	}
+	// プレイヤーがバスト
+	else if(playerScore > 21){
+		console.log(`親の勝ち`)
+	}else if( playerScore === dealerScore ){
+		console.log('引き分け')
+	}else if( playerScore > dealerScore ){
+		console.log(`プレイヤーの勝ち`)
+	}else{
+		console.log(`親の勝ち`)
+	}
+}
+
+// 親は17以上になるまでカードを引き続ける
+function dealerAction(){
+	while(value(dealerCards) < 17){
+		dealerCards.push(hit())
+	}
+}
+
+// プレイヤーは必ず３枚引く
+playerCards.push(deck[0])
+playerCards.push(deck[1])
+playerCards.push(deck[2])
+console.log('player',playerCards, value(playerCards))
+// 親は17を超えるまで引く
+dealerAction()
+console.log('dealer',dealerCards, value(dealerCards))
+// 結果表示
+judge()
+</script>
