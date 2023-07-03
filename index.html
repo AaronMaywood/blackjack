@@ -28,10 +28,6 @@ for(let i=0; i<deck.length ; i++){
 	deck[rand] = tmp
 }
 
-// for(let i=0; i<deck.length ; i++){
-// 	printCard(deck[i])
-// }
-// 
 function printCard(card){
 	console.log(card.number + card.suit)
 }
@@ -49,7 +45,7 @@ function stand(){
 }
 
 // 手札の点数を計算
-function value(cards){
+function value(cards, isLower = false){
 	if(cards.length===0) return 0
 	let aces = 0
 	let points = 0
@@ -69,9 +65,10 @@ function value(cards){
 				break;
 		}
 	}
+	if(isLower) return points	// ace をすべて1とみなした場合の数を返す
 	// 21を超えない範囲でace を1→11とする(21まではOK)
 	for(let i=0; i<aces; i++){
-		if(points + 10 < 21){
+		if(points + 10 <= 21){
 			points += 10
 		}
 	}
@@ -108,8 +105,19 @@ function judge(){
 
 // 親は17以上になるまでカードを引き続ける
 function dealerAction(){
-	while(value(dealerCards) < 17){
-		dealerCards.push(hit())
+	// ace を含む場合には、それを11とするか、1のままにするかという場合に分かれる
+	// すべてのaceを１と数えた場合の最小評価値と、aceを11と解釈した場合に21になるかの最大評価値の２つを使用
+	//		最大値が21ちょうどの場合には止める
+	//		最小値が17以上の場合にもやめる
+	//		それ以外は引く
+	while(value(dealerCards, true) < 17){
+		if(value(dealerCards) === 21){
+			console.log('（親：21になったので引くのをやめます）')
+			break;
+		}else{
+			console.log('（親：次のカードを引きます）')
+			dealerCards.push(hit())
+		}
 	}
 }
 
@@ -119,6 +127,9 @@ playerCards.push(deck[1])
 playerCards.push(deck[2])
 console.log('player',playerCards, value(playerCards))
 // 親は17を超えるまで引く
+// dealerCards.push({number:1,suit:'dummy'})	// 判定試験のため、手動でカードをもたせる場合
+// dealerCards.push({number:1,suit:'dummy'})
+// dealerCards.push({number:10,suit:'dummy'})
 dealerAction()
 console.log('dealer',dealerCards, value(dealerCards))
 // 結果表示
