@@ -37,15 +37,25 @@ function initialize(){
 	}
 
 	// ディーラーとプレイヤーに２枚づつカードを配り、ゲームの初期状態を作る
-	dealerCards.value.push(hit())
-	dealerCards.value.push(hit())
-	playerCards.value.push(hit())
-	playerCards.value.push(hit())
+	dealerCards.value.push(deal())
+	dealerCards.value.push(deal())
+	playerCards.value.push(deal())
+	playerCards.value.push(deal())
+}
+
+// ディーラーは一枚カードを配る
+function deal(){
+	return deck.shift()
 }
 
 // ヒット：カードを一枚引く
 function hit(){
-	return deck.shift()
+	// プレイヤーは一枚引く
+	playerCards.value.push(deal())
+	// ディーラーは、17以下の場合に一枚引く
+	if(score(dealerCards.value, true) < 17){
+		dealerCards.value.push(deal())
+	}
 }
 
 // これ以上カードを引かず、この手で勝負する
@@ -133,8 +143,7 @@ const judge = computed(() => {
 // 親は17以上になるまでカードを引き続ける
 function dealerAction(){
 	while(score(dealerCards.value, true) < 17){
-		console.log('（親：次のカードを引きます）')
-		dealerCards.value.push(hit())
+		dealerCards.value.push(deal())
 	}
 }
 </script>
@@ -161,9 +170,7 @@ function dealerAction(){
 				<Card v-for="card in playerCards" :suit="card.suit" :rank="card.rank" :isOpen="true"></Card>
 			</div>
 			<div class="functions">
-				<!--
 				<button type="button" @click="hit">追加する</button>
-				-->
 				<button type="button" @click="stand">この手で勝負する</button>
 			</div>
 		</section>
