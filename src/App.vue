@@ -7,7 +7,54 @@ const isPlaying = ref(true)	// ゲームプレイ中 or 判定中
 const dealerCards = ref([])	// ディーラーの持ち札
 const playerCards = ref([])	// プレイヤーの持ち札
 initialize()				// 初期化してゲームを開始
+const dealerScore =	computed(() => score(dealerCards.value))	// ディーラーの現在点
+const playerScore = computed(() => score(playerCards.value))	// プレイヤーの現在点
+const dealerScorePrint = computed(() => printScore(dealerScore.value))	// ディーラーの現在点（画面表示用）
+const playerScorePrint = computed(() => printScore(playerScore.value))	// プレイヤーの現在点（画面表示用）
 
+// 現在の判定
+const judge = computed(() => {
+	// プレイヤーもディーラーも両方バスト
+	if( playerScore.value > 21 && dealerScore.value > 21 ){
+		return '引き分け'
+	}
+	// 親がバスト
+	else if(dealerScore.value > 21){
+		return 'プレイヤーの勝ち'
+	}
+	// プレイヤーがバスト
+	else if(playerScore.value > 21){
+		return 'ディーラーの勝ち'
+	}
+	// 両者ともバストしていない　
+	else if( playerScore.value === dealerScore.value ){
+		return '引き分け'
+	}else if( playerScore.value > dealerScore.value ){
+		return 'プレイヤーの勝ち'
+	}else{
+		return 'ディーラーの勝ち'
+	}
+})
+
+// ヒット：プレイヤーは一枚引く
+function hit(){
+	playerCards.value.push(deal())
+}
+
+// これ以上カードを引かず、この手で勝負する
+function stand(){
+	isPlaying.value = false
+	// ディーラーは17以上になるまでカードを追加で引く
+	dealerAction()
+}
+
+// もう一度最初からプレイ
+function replay(){
+	isPlaying.value = true
+	initialize()
+}
+
+// ゲームの初期状態を作る
 function initialize(){
 	deck = []
 	dealerCards.value = []
@@ -48,24 +95,6 @@ function deal(){
 	return deck.shift()
 }
 
-// ヒット：プレイヤーは一枚引く
-function hit(){
-	playerCards.value.push(deal())
-}
-
-// これ以上カードを引かず、この手で勝負する
-function stand(){
-	isPlaying.value = false
-	// ディーラーは17以上になるまでカードを追加で引く
-	dealerAction()
-}
-
-// もう一度最初からプレイ
-function replay(){
-	isPlaying.value = true
-	initialize()
-}
-
 // 手札の点数を計算
 function score(cards, isLower = false){
 	if(cards.length===0) return 0
@@ -98,6 +127,7 @@ function score(cards, isLower = false){
 	return score
 }
 
+// 点数の画面表示用の表現
 function printScore(score){
 	if(score < 21){
 		return score + '点'
@@ -107,33 +137,6 @@ function printScore(score){
 		return 'バスト'
 	}
 }
-
-const dealerScore =	computed(() => score(dealerCards.value))
-const playerScore = computed(() => score(playerCards.value))
-const dealerScorePrint = computed(() => printScore(dealerScore.value))
-const playerScorePrint = computed(() => printScore(playerScore.value))
-const judge = computed(() => {
-	// プレイヤーもディーラーも両方バスト
-	if( playerScore.value > 21 && dealerScore.value > 21 ){
-		return '引き分け'
-	}
-	// 親がバスト
-	else if(dealerScore.value > 21){
-		return 'プレイヤーの勝ち'
-	}
-	// プレイヤーがバスト
-	else if(playerScore.value > 21){
-		return 'ディーラーの勝ち'
-	}
-	// 両者ともバストしていない　
-	else if( playerScore.value === dealerScore.value ){
-		return '引き分け'
-	}else if( playerScore.value > dealerScore.value ){
-		return 'プレイヤーの勝ち'
-	}else{
-		return 'ディーラーの勝ち'
-	}
-})
 
 // 親は17以上になるまでカードを引き続ける
 function dealerAction(){
@@ -181,15 +184,15 @@ function dealerAction(){
 					:isOpen="true"
 				>
 				</Card>
+				<p class="score">合計:{{dealerScorePrint}}</p>
 			</div>
-			<p class="score">合計:{{dealerScorePrint}}</p>
 		</section>
 		<section>
 			<h2>プレイヤー</h2>
 			<div class="cards">
 				<Card v-for="card in playerCards" :suit="card.suit" :rank="card.rank" :isOpen="true"></Card>
+				<p class="score">合計:{{playerScorePrint}}</p>
 			</div>
-			<p class="score">合計:{{playerScorePrint}}</p>
 		</section>
 		<p class="judge">{{judge}}</p>
 		<div class="functions">
@@ -202,6 +205,7 @@ function dealerAction(){
 .cards {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 }
 
 .functions {
@@ -216,6 +220,7 @@ button {
 
 .score {
 	font-size: 2rem;
+	margin-left: 1rem;
 }
 
 .judge {
