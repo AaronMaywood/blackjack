@@ -24,4 +24,5 @@ https://AaronMaywood.github.io/blackjack/
 
 - GitHub Pages は doc/ という名前のフォルダをデプロイ可能（フォルダ名は選択不可能）
 - npm run build で生成した dist/ の中身を doc/ の中に上書きするとその内容でデプロイされる
+    - 相対パスでビルドする必要がある→vite.config.js に設定を追加してある
 
