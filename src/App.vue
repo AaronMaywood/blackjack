@@ -109,9 +109,14 @@ const judge = computed(() => {
 	}
 })
 
-
+const isPlaying = ref(true)
+// これ以上カードを引かず、この手で勝負する
 function stand(){
-// TODO
+	isPlaying.value = false
+}
+
+function replay(){
+	isPlaying.value = true
 }
 
 // 親は17以上になるまでカードを引き続ける
@@ -131,13 +136,12 @@ function dealerAction(){
 		}
 	}
 }
-
 </script>
 
 <template>
 	<h1>ブラックジャック</h1>
 	<!-- ゲームのプレイ中の画面 -->
-	<div id="play">
+	<div v-if="isPlaying">
 		<section>
 			<h2>ディーラー</h2>
 			<div class="cards">
@@ -164,7 +168,7 @@ function dealerAction(){
 		</section>
 	</div>
 	<!-- ゲーム終了し、判定画面 -->
-	<div id="judge">
+	<div v-else>
 		<section>
 			<h2>ディーラー</h2>
 			<div class="cards">
@@ -186,9 +190,7 @@ function dealerAction(){
 		</section>
 		<p>{{judge}}</p>
 		<div class="functions">
-			<!--
-			<button type="button" @click="restart">もう一度プレイする</button>
-			-->
+			<button type="button" @click="replay">もう一度プレイする</button>
 		</div>
 	</div>
 </template>
