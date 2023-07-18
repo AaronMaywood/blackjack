@@ -48,14 +48,9 @@ function deal(){
 	return deck.shift()
 }
 
-// ヒット：カードを一枚引く
+// ヒット：プレイヤーは一枚引く
 function hit(){
-	// プレイヤーは一枚引く
 	playerCards.value.push(deal())
-	// ディーラーは、17以下の場合に一枚引く
-	if(score(dealerCards.value, true) < 17){
-		dealerCards.value.push(deal())
-	}
 }
 
 // これ以上カードを引かず、この手で勝負する
@@ -187,16 +182,16 @@ function dealerAction(){
 				>
 				</Card>
 			</div>
-			<p>合計:{{dealerScorePrint}}</p>
+			<p class="score">合計:{{dealerScorePrint}}</p>
 		</section>
 		<section>
 			<h2>プレイヤー</h2>
 			<div class="cards">
 				<Card v-for="card in playerCards" :suit="card.suit" :rank="card.rank" :isOpen="true"></Card>
 			</div>
-			<p>合計:{{playerScorePrint}}</p>
+			<p class="score">合計:{{playerScorePrint}}</p>
 		</section>
-		<p>{{judge}}</p>
+		<p class="judge">{{judge}}</p>
 		<div class="functions">
 			<button type="button" @click="replay">もう一度プレイする</button>
 		</div>
@@ -217,5 +212,13 @@ function dealerAction(){
 
 button {
 	font-size: 2rem;
+}
+
+.score {
+	font-size: 2rem;
+}
+
+.judge {
+	font-size: 3rem;
 }
 </style>
