@@ -8,11 +8,11 @@ const props = defineProps({
 
 <template>
 	<div class="card">
-		<p v-if="isOpen === 'true'">
-			<span v-if="rank === '1'">A</span>
-			<span v-else-if="rank === '11'">J</span>
-			<span v-else-if="rank === '12'">Q</span>
-			<span v-else-if="rank === '13'">K</span>
+		<p v-if="isOpen === true">
+			<span v-if="rank === 1">A</span>
+			<span v-else-if="rank === 11">J</span>
+			<span v-else-if="rank === 12">Q</span>
+			<span v-else-if="rank === 13">K</span>
 			<span v-else>{{rank}}</span>
 			{{suit}}
 		</p>
