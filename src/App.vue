@@ -2,28 +2,45 @@
 import { ref, computed } from 'vue'
 import Card from './components/Card.vue'
 
-// デッキ（トランプの束）の作成
-// デッキは各スート（♥♠♣◆）の1〜13までのカード（13*4=52枚）とし、ジョーカーは含まない
 let deck = []
-const suit = ['♥','♠','♣','◆']
+const isPlaying = ref(true)	// ゲームプレイ中 or 判定中
+const dealerCards = ref([])	// ディーラーの持ち札
+const playerCards = ref([])	// プレイヤーの持ち札
+initialize()				// 初期化してゲームを開始
 
-for(let i=0;i<suit.length;i++){
-	for(let j=1;j<=13;j++){
-		deck.push({
-			rank:j,
-			suit:suit[i]
-		})
+function initialize(){
+	deck = []
+	dealerCards.value = []
+	playerCards.value = []
+
+	const suit = ['♥','♠','♣','◆']
+				
+	// デッキ（トランプの束）の作成
+	// デッキは各スート（♥♠♣◆）の1〜13までのカード（13*4=52枚）とし、ジョーカーは含まない
+	for(let i=0;i<suit.length;i++){
+		for(let j=1;j<=13;j++){
+			deck.push({
+				rank:j,
+				suit:suit[i]
+			})
+		}
 	}
-}
 
-// デッキのシャッフル
-// 別のやり方：https://ja.javascript.info/task/shuffle
-for(let i=0; i<deck.length ; i++){
-	const rand = Math.floor(Math.random()*deck.length)
-	// [deck[i],deck[rand]] = [deck[rand],deck[i]] // なぜかエラーになる
-	const tmp = deck[i]
-	deck[i] = deck[rand]
-	deck[rand] = tmp
+	// デッキのシャッフル
+	// 別のやり方：https://ja.javascript.info/task/shuffle
+	for(let i=0; i<deck.length ; i++){
+		const rand = Math.floor(Math.random()*deck.length)
+		// [deck[i],deck[rand]] = [deck[rand],deck[i]] // なぜかエラーになる
+		const tmp = deck[i]
+		deck[i] = deck[rand]
+		deck[rand] = tmp
+	}
+
+	// ディーラーとプレイヤーに２枚づつカードを配り、ゲームの初期状態を作る
+	dealerCards.value.push(hit())
+	dealerCards.value.push(hit())
+	playerCards.value.push(hit())
+	playerCards.value.push(hit())
 }
 
 // ヒット：カードを一枚引く
@@ -31,14 +48,18 @@ function hit(){
 	return deck.shift()
 }
 
-const dealerCards = ref([])
-const playerCards = ref([])
+// これ以上カードを引かず、この手で勝負する
+function stand(){
+	isPlaying.value = false
+	// ディーラーは17以上になるまでカードを追加で引く
+	dealerAction()
+}
 
-// ディーラーとプレイヤーに２枚づつカードを配り、ゲームの初期状態を作る
-dealerCards.value.push(hit())
-dealerCards.value.push(hit())
-playerCards.value.push(hit())
-playerCards.value.push(hit())
+// もう一度最初からプレイ
+function replay(){
+	isPlaying.value = true
+	initialize()
+}
 
 // 手札の点数を計算
 function score(cards, isLower = false){
@@ -109,31 +130,11 @@ const judge = computed(() => {
 	}
 })
 
-const isPlaying = ref(true)
-// これ以上カードを引かず、この手で勝負する
-function stand(){
-	isPlaying.value = false
-}
-
-function replay(){
-	isPlaying.value = true
-}
-
 // 親は17以上になるまでカードを引き続ける
 function dealerAction(){
-	// ace を含む場合には、それを11とするか、1のままにするかという場合に分かれる
-	// すべてのaceを１と数えた場合の最小評価値と、aceを11と解釈した場合に21になるかの最大評価値の２つを使用
-	//		最大値が21ちょうどの場合には止める
-	//		最小値が17以上の場合にもやめる
-	//		それ以外は引く
-	while(value(dealerCards, true) < 17){
-		if(value(dealerCards) === 21){
-			console.log('（親：21になったので引くのをやめます）')
-			break;
-		}else{
-			console.log('（親：次のカードを引きます）')
-			dealerCards.push(hit())
-		}
+	while(score(dealerCards.value, true) < 17){
+		console.log('（親：次のカードを引きます）')
+		dealerCards.value.push(hit())
 	}
 }
 </script>
