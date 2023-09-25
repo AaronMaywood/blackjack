@@ -50,12 +50,12 @@ function stand(){
 
 // もう一度最初からプレイ
 function replay(){
-	isPlaying.value = true
 	initialize()
 }
 
 // ゲームの初期状態を作る
 function initialize(){
+	isPlaying.value = true
 	deck = []
 	dealerCards.value = []
 	playerCards.value = []
